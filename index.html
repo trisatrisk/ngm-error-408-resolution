@@ -171,7 +171,7 @@
         <div id="formSection">
             <textarea id="textInput" placeholder="Write your response here... (Minimum 30 words)"></textarea>
             <div class="counter" id="wordCountLabel">0 / 30 words</div>
-            <button id="submitBtn">Submit Response (+5% Signal)</button>
+            <button id="submitBtn" disabled>Submit Response (+5% Signal)</button>
             <div class="success-banner" id="successMsg">✓ Response successfully logged! +5% Added.</div>
         </div>
     </div>
@@ -184,7 +184,7 @@
             <div class="bar bar3 complete"></div>
             <div class="bar bar4 complete"></div>
         </div>
-        <div class="power-status complete-text">⚡ CONNECTION SIGNAL (UPDATES EVERY 1 HOUR): 100% [FULLY RESTORED]</div>
+        <div class="power-status complete-text">⚡ CONNECTION SIGNAL (UPDATES EVERY HOUR): 100% [FULLY RESTORED]</div>
         <p>Thanks for your help in restoring our internet connection! NGM's final release is saved and will drop THIS FRIDAY on July 3rd!</p>
         <p><a href="https://tinyurl.com" target="_blank">https://tinyurl.com</a></p>
     </div>
@@ -192,11 +192,11 @@
 
 <script>
     // ==========================================
-    // 🛠️ LIVE CURRENT CONFIGURATION
-    // Change this number whenever you want to update the shared progress!
-    // Set it to 100 when you are ready to reveal the final drop link!
+    // 🛠️ CUSTOM GOOGLE FORM CONFIGURATION
     // ==========================================
-    const CURRENT_COMMUNITY_PERCENTAGE = 0; 
+    const CURRENT_COMMUNITY_PERCENTAGE = 0; // Adjust score level manually here (0-100)
+    const GOOGLE_FORM_ACTION_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSf9FD3xqfyt1quKEy8xssWLjOuzaFcgiVQDY4rLjXxSXceHmA/formResponse?usp=pp_url&entry.1369356441=TESTDATA';
+    const GOOGLE_FORM_ENTRY_ID = 'entry.1369356441'; // Paste your input ID sequence here
     // ==========================================
 
     const textInput = document.getElementById('textInput');
@@ -212,7 +212,7 @@
         document.getElementById('bar3'), document.getElementById('bar4')
     ];
 
-    // Word counter engine - completely client side
+    // Word counter execution sequence
     textInput.addEventListener('input', () => {
         const text = textInput.value.trim();
         const wordCount = text === "" ? 0 : text.split(/\s+/).length;
@@ -220,12 +220,14 @@
         
         if (wordCount >= 30) {
             wordCountLabel.style.color = "#10b981";
+            submitBtn.disabled = false;
         } else {
             wordCountLabel.style.color = "#6b7280";
+            submitBtn.disabled = true;
         }
     });
 
-    // Graphic render engine 
+    // Graphic component drawing routine
     function updateSignalUI(percentage) {
         const currentPercentage = Math.min(percentage, 100);
 
@@ -235,9 +237,8 @@
             return;
         }
 
-        powerLabel.textContent = `CONNECTION SIGNAL (UPDATES EVERY 1 HOUR): ${currentPercentage}%`;
+        powerLabel.textContent = `CONNECTION SIGNAL (UPDATES EVERY HOUR): ${currentPercentage}%`;
 
-        // Lit up bars based on 25% thresholds
         const activeBarsThreshold = Math.floor(currentPercentage / 25);
         bars.forEach((bar, index) => {
             if (index < activeBarsThreshold) {
@@ -248,7 +249,7 @@
         });
     }
 
-    // Submit animation handler
+    // Submit handler packet routing loop
     submitBtn.addEventListener('click', () => {
         const messageText = textInput.value.trim();
         const wordCount = messageText === "" ? 0 : messageText.split(/\s+/).length;
@@ -258,11 +259,42 @@
             return;
         }
 
-        // Locally show the user their entry added 5% on top of the community number
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Transmitting data chunks...";
+
+        // Silently submit data directly into your Google Sheet log in the background
+        const hiddenForm = document.createElement('form');
+        hiddenForm.action = GOOGLE_FORM_ACTION_URL;
+        hiddenForm.method = 'POST';
+        hiddenForm.target = 'hidden_iframe'; // Prevents page from redirecting
+
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = GOOGLE_FORM_ENTRY_ID;
+        hiddenInput.value = messageText;
+
+        // Create a temporary hidden iframe so the page stays clean
+        let iframe = document.getElementById('hidden_iframe');
+        if (!iframe) {
+            iframe = document.createElement('iframe');
+            iframe.id = 'hidden_iframe';
+            iframe.name = 'hidden_iframe';
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+        }
+
+        hiddenForm.appendChild(hiddenInput);
+        document.body.appendChild(hiddenForm);
+        hiddenForm.submit();
+        
+        // Cleanup DOM form node elements right away
+        document.body.removeChild(hiddenForm);
+
+        // Animate local progress loop +5% safely
         const dynamicLocalPercentage = CURRENT_COMMUNITY_PERCENTAGE + 5;
         updateSignalUI(dynamicLocalPercentage);
 
-        // Successful local layout animation loop shift
+        // UI success panel state shifts
         textInput.value = "";
         wordCountLabel.textContent = "0 / 30 words";
         successMsg.style.display = "block";
@@ -271,7 +303,7 @@
         submitBtn.style.display = "none";
     });
 
-    // Initial load execution utilizing your custom constant configuration variable
+    // Initial draw operation
     updateSignalUI(CURRENT_COMMUNITY_PERCENTAGE);
 </script>
 
