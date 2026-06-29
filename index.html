@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>[NG!?#$] @?2#3?@$48 - %#$2/%4$#3?%$^&</title>
-    <!-- Supabase Library -->
+    <!-- Include Supabase Library -->
     <script src="https://jsdelivr.net"></script>
     <style>
         body {
@@ -35,6 +35,7 @@
             margin-top: 0;
             letter-spacing: 1px;
             text-align: center;
+            line-height: 1.4;
         }
         .description {
             font-size: 15px;
@@ -152,15 +153,14 @@
 <body>
 
 <div class="container">
-    <!-- Active Game Layout -->
+    <!-- Active Game Screen -->
     <div id="gameActive">
         <h1>[NG!?#$] @?2#3?@$48 - %#$2/%4$#3?%$^&</h1>
         <div class="description">
-            "Oh no! Error 408 encountered - our final NGM release cannot be loaded and is at risk of being lost!<br><br>
-            We need YOUR help to restore our internet connection to its original state in order to drop our final release! Type a few words below about how NGM or trissy boi has inspired or helped you in your journey as an EDM listener, EDM producer or as an individual to contribute to the restoration of the internet connection!"
+            Oh no! Error 408 encountered - our final NGM release cannot be loaded and is at risk of being lost!<br><br>We need YOUR help to restore our internet connection to its original state in order to drop our final release! Type a few words below about how NGM or trissy boi has inspired or helped you in your journey as an EDM listener, EDM producer or as an individual to contribute to the restoration of the internet connection!
         </div>
 
-        <!-- Wi-Fi Visual -->
+        <!-- Visual Wi-Fi Bars -->
         <div class="wifi-icon">
             <div class="bar bar1" id="bar1"></div>
             <div class="bar bar2" id="bar2"></div>
@@ -169,7 +169,7 @@
         </div>
         <div class="power-status" id="powerLabel">Syncing status...</div>
 
-        <!-- Form Elements -->
+        <!-- Interactive Form Elements -->
         <div id="formSection">
             <textarea id="textInput" placeholder="Write your response here... (Minimum 30 words)"></textarea>
             <div class="counter" id="wordCountLabel">0 / 30 words</div>
@@ -178,7 +178,7 @@
         </div>
     </div>
 
-    <!-- Victory Screen (Triggered at 100% Signal) -->
+    <!-- Victory Screen (Triggered automatically at 100%) -->
     <div id="gameComplete" class="final-screen">
         <div class="wifi-icon">
             <div class="bar bar1 complete"></div>
@@ -188,14 +188,14 @@
         </div>
         <div class="power-status complete-text">⚡ CONNECTION SIGNAL: 100% [FULLY RESTORED]</div>
         <p>Thanks for your help in restoring our internet connection! NGM's final release is saved and will drop THIS FRIDAY on July 3rd!</p>
-        <p><a href="https://tinyurl.com" target="_blank">https://tinyurl.com</a></p>
+        <p><a href="https://tinyurl.com/ngmusicz-next-generation" target="_blank">https://tinyurl.com/ngmusicz-next-generation</a></p>
     </div>
 </div>
 
 <script>
-    // PASTE YOUR SUPABASE PROJECT CONFIG DATA DETAILS HERE
-    const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL'; 
-    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+    // Config configuration parameters
+    const SUPABASE_URL = 'https://fvnyolebtvsxdswnfyle.supabase.co'; 
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2bnlvbGVidHZzeGRzd25meWxlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2OTI4ODEsImV4cCI6MjA5ODI2ODg4MX0.V7Mre13vseummTzPTw2cbvTw5OQ7s4wdaPHKAu1ORjc';
     
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -206,16 +206,13 @@
     const successMsg = document.getElementById('successMsg');
     const gameActive = document.getElementById('gameActive');
     const gameComplete = document.getElementById('gameComplete');
-    const formSection = document.getElementById('formSection');
     
     const bars = [
         document.getElementById('bar1'), document.getElementById('bar2'),
         document.getElementById('bar3'), document.getElementById('bar4')
     ];
 
-    let globalProgressPercent = 0;
-
-    // Track real-time word counting
+    // Track dynamic character logic setup rules
     textInput.addEventListener('input', () => {
         const text = textInput.value.trim();
         const wordCount = text === "" ? 0 : text.split(/\s+/).length;
@@ -228,21 +225,22 @@
         }
     });
 
-    // Update Wi-Fi signal graphic tiers
-    function renderSignalBars(totalEntries) {
-        globalProgressPercent = Math.min(totalEntries * 5, 100);
+    // Update Wi-Fi component UI status blocks
+    function updateSignalUI(totalCount) {
+        const percentage = Math.min(totalCount * 5, 100);
 
-        if (globalProgressPercent >= 100) {
+        if (percentage >= 100) {
             gameActive.style.display = "none";
             gameComplete.style.display = "block";
             return;
         }
 
-        powerLabel.textContent = `CONNECTION SIGNAL: ${globalProgressPercent}%`;
+        powerLabel.textContent = `CONNECTION SIGNAL: ${percentage}%`;
 
-        const barsToLight = Math.floor(globalProgressPercent / 25);
+        // Fill up four cascading segments sequentially (0%, 25%, 50%, 75%, 100%)
+        const activeBarsThreshold = Math.floor(percentage / 25);
         bars.forEach((bar, index) => {
-            if (index < barsToLight) {
+            if (index < activeBarsThreshold) {
                 bar.classList.add('active');
             } else {
                 bar.classList.remove('active');
@@ -250,58 +248,61 @@
         });
     }
 
-    // Load state from DB on page open
-    async function initNetworkState() {
-        const { data } = await _supabase.from('wifi_status').select('total_entries').eq('id', 1).single();
-        if (data) {
-            renderSignalBars(data.total_entries);
+    // Connect and draw primary metrics
+    async function loadCurrentState() {
+        const { count, error } = await _supabase
+            .from('user_responses')
+            .select('*', { count: 'exact', head: true });
+
+        if (!error) {
+            updateSignalUI(count || 0);
         }
     }
 
-    // Submission Logic
+    // Save inputs
     submitBtn.addEventListener('click', async () => {
-        const msg = textInput.value.trim();
-        const wordCount = msg === "" ? 0 : msg.split(/\s+/).length;
+        const messageText = textInput.value.trim();
+        const wordCount = messageText === "" ? 0 : messageText.split(/\s+/).length;
 
         if (wordCount < 30) {
-            alert(`You need ${30 - wordCount} more words to complete the connection handshake.`);
+            alert(`You need ${30 - wordCount} more words to transmit this connection packet.`);
             return;
         }
 
         submitBtn.disabled = true;
         submitBtn.textContent = "Transmitting data chunks...";
 
-        // 1. Insert user message text into logging table
-        const { error: textErr } = await _supabase
+        const { error } = await _supabase
             .from('user_responses')
-            .insert([{ response_text: msg }]);
+            .insert([{ response_text: messageText }]);
 
-        if(textErr) {
-            alert("Transmission failed. Please verify your connection setup.");
+        if (error) {
+            alert("Transmission failed. Confirm Row Level Security configurations are set correctly.");
             submitBtn.disabled = false;
             submitBtn.textContent = "Submit Response (+5% Signal)";
             return;
         }
 
-        // 2. Fetch, increment, and overwrite counter status values
-        const { data: currentCounter } = await _supabase.from('wifi_status').select('total_entries').eq('id', 1).single();
-        const newCount = (currentCounter ? currentCounter.total_entries : 0) + 1;
-await _supabase.from('wifi_status').update({ total_entries: newCount }).eq('id', 1);
+        // Hide elements instantly on success loop
+        textInput.value = "";
+        wordCountLabel.textContent = "0 / 30 words";
+        successMsg.style.display = "block";
+    
+    textInput.style.display = "none";
+    wordCountLabel.style.display = "none";
+    submitBtn.style.display = "none";
+    
+    // Recount immediately locally
+    loadCurrentState();
+});
 
-                               // UI success toggle adjustments
-textInput.value = "";
-wordCountLabel.textContent = "0 / 30 words";
-successMsg.style.display = "block";
-textInput.style.display = "none";
-wordCountLabel.style.display = "none";
-submitBtn.style.display = "none";
-
-                               // Establish live listener configuration
+// Listen for global user insert pings instantly
 _supabase
-.channel('any')
-.on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'wifi_status' }, payload => {
-renderSignalBars(payload.new.total_entries);
-})
-.subscribe();
-        
-initNetworkState();
+    .channel('db-sync')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'user_responses' }, () => {
+        loadCurrentState();
+    })
+    .subscribe();
+
+// Pull counter stats immediately on page launch
+loadCurrentState();
