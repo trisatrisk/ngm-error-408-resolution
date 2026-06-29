@@ -184,7 +184,7 @@
             <div class="bar bar3 complete"></div>
             <div class="bar bar4 complete"></div>
         </div>
-        <div class="power-status complete-text">⚡ CONNECTION SIGNAL: 100% [FULLY RESTORED]</div>
+        <div class="power-status complete-text">⚡ CONNECTION SIGNAL (UPDATES EVERY 1 HOUR): 100% [FULLY RESTORED]</div>
         <p>Thanks for your help in restoring our internet connection! NGM's final release is saved and will drop THIS FRIDAY on July 3rd!</p>
         <p><a href="https://tinyurl.com" target="_blank">https://tinyurl.com</a></p>
     </div>
@@ -235,7 +235,7 @@
             return;
         }
 
-        powerLabel.textContent = `CONNECTION SIGNAL: ${currentPercentage}%`;
+        powerLabel.textContent = `CONNECTION SIGNAL (UPDATES EVERY 1 HOUR): ${currentPercentage}%`;
 
         // Lit up bars based on 25% thresholds
         const activeBarsThreshold = Math.floor(currentPercentage / 25);
