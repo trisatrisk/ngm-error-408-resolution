@@ -171,8 +171,8 @@
         <div id="formSection">
             <textarea id="textInput" placeholder="Write your response here... (Minimum 30 words)"></textarea>
             <div class="counter" id="wordCountLabel">0 / 30 words</div>
-            <button id="submitBtn" disabled>Submit Response (+10% Signal)</button>
-            <div class="success-banner" id="successMsg">✓ Response successfully logged! +10% Added.</div>
+            <button id="submitBtn" disabled>Submit Response (+5% Signal)</button>
+            <div class="success-banner" id="successMsg">✓ Response successfully logged! +5% Added.</div>
         </div>
     </div>
 
@@ -194,7 +194,7 @@
     // ==========================================
     // 🛠️ CUSTOM GOOGLE FORM CONFIGURATION
     // ==========================================
-    const CURRENT_COMMUNITY_PERCENTAGE = 0; // Adjust score level manually here (0-100)
+    const CURRENT_COMMUNITY_PERCENTAGE = 50; // Adjust score level manually here (0-100)
     const GOOGLE_FORM_ACTION_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSfp5cPvqExm6Xe2CPkwY8e-fbBgrlkQXJ8_X5seVGui5RZUMA/formResponse';
     const GOOGLE_FORM_ENTRY_ID = 'entry.1585554824'; // Paste your input ID sequence here
     // ==========================================
@@ -291,7 +291,7 @@
         document.body.removeChild(hiddenForm);
 
         // Animate local progress loop +10% safely
-        const dynamicLocalPercentage = CURRENT_COMMUNITY_PERCENTAGE + 10;
+        const dynamicLocalPercentage = CURRENT_COMMUNITY_PERCENTAGE + 5;
         updateSignalUI(dynamicLocalPercentage);
 
         // UI success panel state shifts
