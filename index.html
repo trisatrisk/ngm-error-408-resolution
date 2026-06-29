@@ -191,9 +191,13 @@
 </div>
 
 <script>
-    // 1. UPDATE YOUR SUPABASE CREDENTIALS HERE
-    const SUPABASE_URL = 'https://fvnyolebtvsxdswnfyle.supabase.co'; 
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2bnlvbGVidHZzeGRzd25meWxlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2OTI4ODEsImV4cCI6MjA5ODI2ODg4MX0.V7Mre13vseummTzPTw2cbvTw5OQ7s4wdaPHKAu1ORjc';
+    // ==========================================
+    // 🛠️ LIVE CURRENT CONFIGURATION
+    // Change this number whenever you want to update the shared progress!
+    // Set it to 100 when you are ready to reveal the final drop link!
+    // ==========================================
+    const CURRENT_COMMUNITY_PERCENTAGE = 0; 
+    // ==========================================
 
     const textInput = document.getElementById('textInput');
     const wordCountLabel = document.getElementById('wordCountLabel');
@@ -208,7 +212,7 @@
         document.getElementById('bar3'), document.getElementById('bar4')
     ];
 
-    // Word checking logic - Native JS (Will never stay stuck at 0)
+    // Word counter engine - completely client side
     textInput.addEventListener('input', () => {
         const text = textInput.value.trim();
         const wordCount = text === "" ? 0 : text.split(/\s+/).length;
@@ -221,19 +225,20 @@
         }
     });
 
-    // Update Wi-Fi UI Elements
-    function updateSignalUI(totalCount) {
-        const percentage = Math.min(totalCount * 5, 100);
+    // Graphic render engine 
+    function updateSignalUI(percentage) {
+        const currentPercentage = Math.min(percentage, 100);
 
-        if (percentage >= 100) {
+        if (currentPercentage >= 100) {
             gameActive.style.display = "none";
             gameComplete.style.display = "block";
             return;
         }
 
-        powerLabel.textContent = `CONNECTION SIGNAL: ${percentage}%`;
+        powerLabel.textContent = `CONNECTION SIGNAL: ${currentPercentage}%`;
 
-        const activeBarsThreshold = Math.floor(percentage / 25);
+        // Lit up bars based on 25% thresholds
+        const activeBarsThreshold = Math.floor(currentPercentage / 25);
         bars.forEach((bar, index) => {
             if (index < activeBarsThreshold) {
                 bar.classList.add('active');
@@ -243,35 +248,8 @@
         });
     }
 
-    // Direct Database Fetch using standard Fetch API
-    async function loadCurrentState() {
-        try {
-            const url = `${SUPABASE_URL}/rest/v1/user_responses?select=id`;
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                    'Range-Unit': 'items',
-                    'Range': '0-0' // Requests only header counts, saving bandwidth
-                }
-            });
-
-            // Read total rows directly from content-range header
-            const contentRange = response.headers.get('content-range');
-            let totalCount = 0;
-            if (contentRange) {
-                totalCount = parseInt(contentRange.split('/')[1]) || 0;
-            }
-            updateSignalUI(totalCount);
-        } catch (error) {
-            console.error("Fetch failure:", error);
-            powerLabel.textContent = "Connection Error (Check API configurations)";
-        }
-    }
-
-    // Native Database Submission Routine
-    submitBtn.addEventListener('click', async () => {
+    // Submit animation handler
+    submitBtn.addEventListener('click', () => {
         const messageText = textInput.value.trim();
         const wordCount = messageText === "" ? 0 : messageText.split(/\s+/).length;
 
@@ -280,46 +258,21 @@
             return;
         }
 
-        submitBtn.disabled = true;
-        submitBtn.textContent = "Transmitting data chunks...";
+        // Locally show the user their entry added 5% on top of the community number
+        const dynamicLocalPercentage = CURRENT_COMMUNITY_PERCENTAGE + 5;
+        updateSignalUI(dynamicLocalPercentage);
 
-        try {
-            const url = `${SUPABASE_URL}/rest/v1/user_responses`;
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                    'Content-Type': 'application/json',
-                    'Prefer': 'return=minimal'
-                },
-                body: JSON.stringify({ response_text: messageText })
-            });
-
-            if (!response.ok) throw new Error("Server rejected data chunk"); 
-
-            // Successful submission animation UI shift
-            textInput.value = "";
-            wordCountLabel.textContent = "0 / 30 words";
-            successMsg.style.display = "block";
-            textInput.style.display = "none";
-            wordCountLabel.style.display = "none";
-            submitBtn.style.display = "none";
-
-            // Instantly update local interface score mapping
-            loadCurrentState();
-        } catch (error) {
-            alert("Transmission failed. Make sure Row Level Security (RLS) is disabled for user_responses.");
-            submitBtn.disabled = false;
-            submitBtn.textContent = "Submit Response (+5% Signal)";
-        }
+        // Successful local layout animation loop shift
+        textInput.value = "";
+        wordCountLabel.textContent = "0 / 30 words";
+        successMsg.style.display = "block";
+        textInput.style.display = "none";
+        wordCountLabel.style.display = "none";
+        submitBtn.style.display = "none";
     });
 
-    // Check database every 10 seconds for new community entries
-    setInterval(loadCurrentState, 10000);
-
-    // Initial launch load execution
-    loadCurrentState();
+    // Initial load execution utilizing your custom constant configuration variable
+    updateSignalUI(CURRENT_COMMUNITY_PERCENTAGE);
 </script>
 
 </body>
