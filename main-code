@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restore the Wi-Fi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            background-color: #1e293b;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 500px;
+        }
+        /* Wi-Fi Icon Container */
+        .wifi-icon {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            height: 60px;
+            gap: 6px;
+            margin-bottom: 20px;
+        }
+        /* Wi-Fi Bars */
+        .bar {
+            width: 12px;
+            background-color: #475569;
+            border-radius: 3px;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+        .bar1 { height: 15px; }
+        .bar2 { height: 30px; }
+        .bar3 { height: 45px; }
+        .bar4 { height: 60px; }
+        /* Active Status Colors */
+        .bar.active {
+            background-color: #22c55e;
+            box-shadow: 0 0 10px #22c55e;
+        }
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #475569;
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-size: 16px;
+            resize: none;
+            box-sizing: border-box;
+        }
+        textarea:focus {
+            outline: 2px solid #3b82f6;
+        }
+        .status {
+            margin-top: 15px;
+            font-weight: bold;
+            min-height: 24px;
+        }
+        .success {
+            color: #22c55e;
+            animation: blink 1s infinite alternate;
+        }
+        @keyframes blink {
+            from { opacity: 0.6; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Signal Lost!</h2>
+    <p>Type a paragraph (at least 40 words) to restore the Wi-Fi.</p>
+    
+    <!-- Wi-Fi Bars Visual -->
+    <div class="wifi-icon">
+        <div class="bar bar1" id="bar1"></div>
+        <div class="bar bar2" id="bar2"></div>
+        <div class="bar bar3" id="bar3"></div>
+        <div class="bar bar4" id="bar4"></div>
+    </div>
+
+    <!-- User Input -->
+    <textarea id="textInput" placeholder="Start writing your story here..."></textarea>
+    
+    <!-- Status Message -->
+    <div class="status" id="statusMessage">0 words typed (0% connected)</div>
+</div>
+
+<script>
+    const textInput = document.getElementById('textInput');
+    const statusMessage = document.getElementById('statusMessage');
+    const bars = [
+        document.getElementById('bar1'),
+        document.getElementById('bar2'),
+        document.getElementById('bar3'),
+        document.getElementById('bar4')
+    ];
+
+    // Target goal: 40 words total (10 words per bar)
+    const TARGET_WORDS = 40;
+
+    textInput.addEventListener('input', () => {
+        const text = textInput.value.trim();
+        
+        // Count words accurately
+        const wordCount = text === "" ? 0 : text.split(/\s+/).length;
+        
+        // Calculate progress percentage
+        const progress = Math.min((wordCount / TARGET_WORDS) * 100, 100);
+        
+        // Determine how many bars to light up (0 to 4)
+        const barsToLight = Math.floor((progress / 100) * bars.length);
+
+        // Update UI bars
+        bars.forEach((bar, index) => {
+            if (index < barsToLight) {
+                bar.classList.add('active');
+            } else {
+                bar.classList.remove('active');
+            }
+        });
+
+        // Update status text
+        if (progress >= 100) {
+            statusMessage.innerHTML = "<span class='success'>⚡ Wi-Fi Fully Restored! Connected.</span>";
+            textInput.disabled = true; // Optional: lock text when done
+        } else {
+            statusMessage.textContent = `${wordCount} / ${TARGET_WORDS} words (${Math.round(progress)}% connected)`;
+        }
+    });
+</script>
+
+</body>
+</html>
