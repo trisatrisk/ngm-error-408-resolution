@@ -65,7 +65,6 @@
             background-color: #3b82f6;
             box-shadow: 0 0 15px #3b82f6;
         }
-        /* When 100% finished, flash green instead of blue */
         .bar.complete {
             background-color: #10b981;
             box-shadow: 0 0 15px #10b981;
@@ -161,7 +160,7 @@
             We need YOUR help to restore our internet connection to its original state in order to drop our final release! Type a few words below about how NGM or trissy boi has inspired or helped you in your journey as an EDM listener, EDM producer or as an individual to contribute to the restoration of the internet connection!"
         </div>
 
-        <!-- Wi-Fi Graphic Component -->
+        <!-- Wi-Fi Visual -->
         <div class="wifi-icon">
             <div class="bar bar1" id="bar1"></div>
             <div class="bar bar2" id="bar2"></div>
@@ -179,7 +178,7 @@
         </div>
     </div>
 
-    <!-- Capped 100% Final Victory Layout -->
+    <!-- Victory Screen (Triggered at 100% Signal) -->
     <div id="gameComplete" class="final-screen">
         <div class="wifi-icon">
             <div class="bar bar1 complete"></div>
@@ -189,14 +188,14 @@
         </div>
         <div class="power-status complete-text">⚡ CONNECTION SIGNAL: 100% [FULLY RESTORED]</div>
         <p>Thanks for your help in restoring our internet connection! NGM's final release is saved and will drop THIS FRIDAY on July 3rd!</p>
-        <p><a href="https://tinyurl.com/ngmusicz-next-generation" target="_blank">https://tinyurl.com/ngmusicz-next-generation</a></p>
+        <p><a href="https://tinyurl.com" target="_blank">https://tinyurl.com</a></p>
     </div>
 </div>
 
 <script>
-    // 1. ADD YOUR COPIED CONFIG DETAILS HERE
-    const SUPABASE_URL = 'https://fvnyolebtvsxdswnfyle.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2bnlvbGVidHZzeGRzd25meWxlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2OTI4ODEsImV4cCI6MjA5ODI2ODg4MX0.V7Mre13vseummTzPTw2cbvTw5OQ7s4wdaPHKAu1ORjc';
+    // PASTE YOUR SUPABASE PROJECT CONFIG DATA DETAILS HERE
+    const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL'; 
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
     
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -216,7 +215,7 @@
 
     let globalProgressPercent = 0;
 
-    // Word checking logic
+    // Track real-time word counting
     textInput.addEventListener('input', () => {
         const text = textInput.value.trim();
         const wordCount = text === "" ? 0 : text.split(/\s+/).length;
@@ -229,7 +228,7 @@
         }
     });
 
-    // Process and match Wi-Fi signal graphics
+    // Update Wi-Fi signal graphic tiers
     function renderSignalBars(totalEntries) {
         globalProgressPercent = Math.min(totalEntries * 5, 100);
 
@@ -241,7 +240,6 @@
 
         powerLabel.textContent = `CONNECTION SIGNAL: ${globalProgressPercent}%`;
 
-        // Distribute 4 bars mathematically across progress levels (25% chunks)
         const barsToLight = Math.floor(globalProgressPercent / 25);
         bars.forEach((bar, index) => {
             if (index < barsToLight) {
@@ -252,7 +250,7 @@
         });
     }
 
-    // Grab current data snapshot on initialization
+    // Load state from DB on page open
     async function initNetworkState() {
         const { data } = await _supabase.from('wifi_status').select('total_entries').eq('id', 1).single();
         if (data) {
@@ -260,7 +258,7 @@
         }
     }
 
-    // Submit Action Routine
+    // Submission Logic
     submitBtn.addEventListener('click', async () => {
         const msg = textInput.value.trim();
         const wordCount = msg === "" ? 0 : msg.split(/\s+/).length;
@@ -273,7 +271,7 @@
         submitBtn.disabled = true;
         submitBtn.textContent = "Transmitting data chunks...";
 
-        // A. Post text entry into database spreadsheet logs
+        // 1. Insert user message text into logging table
         const { error: textErr } = await _supabase
             .from('user_responses')
             .insert([{ response_text: msg }]);
@@ -285,4 +283,25 @@
             return;
         }
 
-        // B. Grab current counter value, augment it by 1, and save
+        // 2. Fetch, increment, and overwrite counter status values
+        const { data: currentCounter } = await _supabase.from('wifi_status').select('total_entries').eq('id', 1).single();
+        const newCount = (currentCounter ? currentCounter.total_entries : 0) + 1;
+await _supabase.from('wifi_status').update({ total_entries: newCount }).eq('id', 1);
+
+                               // UI success toggle adjustments
+textInput.value = "";
+wordCountLabel.textContent = "0 / 30 words";
+successMsg.style.display = "block";
+textInput.style.display = "none";
+wordCountLabel.style.display = "none";
+submitBtn.style.display = "none";
+
+                               // Establish live listener configuration
+_supabase
+.channel('any')
+.on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'wifi_status' }, payload => {
+renderSignalBars(payload.new.total_entries);
+})
+.subscribe();
+        
+initNetworkState();
